@@ -1,0 +1,90 @@
+from typing import Optional
+from datetime import date
+from app.schemas.workout import Workout, WorkoutCreate, GymType
+from app.repositories.workout_repository import workout_repository
+
+
+def filter_workouts(
+    workouts: list[Workout],
+    type: GymType | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    min_duration: int | None = None,
+    max_duration: int | None = None,
+) -> list[Workout]:
+    """
+    Фильтрует список тренировок по заданным параметрам.
+    
+    Args:
+        workouts: Список тренировок для фильтрации
+        type: Тип тренировки
+        date_from: Начальная дата (включительно)
+        date_to: Конечная дата (включительно)
+        min_duration: Минимальная длительность
+        max_duration: Максимальная длительность
+    
+    Returns:
+        Отфильтрованный список тренировок
+    """
+    result_list = list(workouts)
+    
+    filters = [
+        (type, lambda x: x.type == type),
+        (date_from, lambda x: x.planned_date is not None and date_from <= x.planned_date),
+        (date_to, lambda x: x.planned_date is not None and x.planned_date <= date_to),
+        (min_duration, lambda x: x.duration is not None and x.duration >= min_duration),
+        (max_duration, lambda x: x.duration is not None and x.duration <= max_duration),
+    ]
+    
+    for condition, filter_func in filters:
+        if condition is not None:
+            result_list = list(filter(filter_func, result_list))
+    
+    return result_list
+
+
+class WorkoutService:
+    """Сервис для бизнес-логики тренировок"""
+    
+    def __init__(self, repository=workout_repository):
+        self.repository = repository
+    
+    def create_workout(self, workout_data: WorkoutCreate) -> Workout:
+        """Создать новую тренировку"""
+        return self.repository.create(workout_data)
+    
+    def get_workouts(
+        self,
+        type: GymType | None = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
+        min_duration: int | None = None,
+        max_duration: int | None = None,
+    ) -> list[Workout]:
+        """Получить список тренировок с фильтрацией"""
+        all_workouts = self.repository.get_all()
+        return filter_workouts(
+            all_workouts,
+            type=type,
+            date_from=date_from,
+            date_to=date_to,
+            min_duration=min_duration,
+            max_duration=max_duration,
+        )
+    
+    def get_workout_by_id(self, workout_id: int) -> Optional[Workout]:
+        """Получить тренировку по ID"""
+        return self.repository.get_by_id(workout_id)
+    
+    def update_workout(self, workout_id: int, workout_data: WorkoutCreate) -> Optional[Workout]:
+        """Обновить тренировку"""
+        return self.repository.update(workout_id, workout_data)
+    
+    def delete_workout(self, workout_id: int) -> bool:
+        """Удалить тренировку"""
+        return self.repository.delete(workout_id)
+
+
+# Глобальный экземпляр сервиса
+workout_service = WorkoutService()
+

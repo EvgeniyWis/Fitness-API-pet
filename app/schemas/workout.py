@@ -1,11 +1,13 @@
-from typing import Literal
+from typing import Literal, Optional
 from datetime import date
 from pydantic import BaseModel
-from typing import Optional
+
 
 GymType = Literal["gym", "volleyball"]
 
+
 class WorkoutCreate(BaseModel):
+    """Схема для создания тренировки"""
     type: GymType
     duration: int
     repetitions: int
@@ -13,5 +15,8 @@ class WorkoutCreate(BaseModel):
     notes: Optional[str] = None
     exercises: Optional[list[str]] = None
 
+
 class Workout(WorkoutCreate):
+    """Схема тренировки с ID"""
     id: int
+
