@@ -52,10 +52,6 @@ uv sync
 uv run uvicorn app.main:app --reload
 ```
 
-```bash
-uv run uvicorn main:app --reload
-```
-
 Приложение будет доступно по адресу: `http://localhost:8000`
 
 Документация API (Swagger UI): `http://localhost:8000/docs`  

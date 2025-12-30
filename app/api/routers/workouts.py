@@ -19,6 +19,8 @@ async def get_workouts(
     date_to: date | None = None,
     min_duration: int | None = None,
     max_duration: int | None = None,
+    page: int = 1,
+    size: int = 10,
 ) -> list[Workout]:
     """Получить список тренировок с поддержкой фильтрации"""
     return workout_service.get_workouts(
@@ -27,6 +29,8 @@ async def get_workouts(
         date_to=date_to,
         min_duration=min_duration,
         max_duration=max_duration,
+        page=page,
+        size=size,
     )
 
 

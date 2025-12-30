@@ -11,6 +11,8 @@ def filter_workouts(
     date_to: date | None = None,
     min_duration: int | None = None,
     max_duration: int | None = None,
+    page: int = 1,
+    size: int = 10,
 ) -> list[Workout]:
     """
     Фильтрует список тренировок по заданным параметрам.
@@ -22,11 +24,15 @@ def filter_workouts(
         date_to: Конечная дата (включительно)
         min_duration: Минимальная длительность
         max_duration: Максимальная длительность
+        page: Номер страницы
+        size: Количество элементов на странице
     
     Returns:
         Отфильтрованный список тренировок
     """
     result_list = list(workouts)
+    page -= 1
+    paged_result_list = result_list[page * size:(page + 1) * size]
     
     filters = [
         (type, lambda x: x.type == type),
@@ -38,9 +44,9 @@ def filter_workouts(
     
     for condition, filter_func in filters:
         if condition is not None:
-            result_list = list(filter(filter_func, result_list))
+            paged_result_list = list(filter(filter_func, paged_result_list))
     
-    return result_list
+    return paged_result_list
 
 
 class WorkoutService:
@@ -60,6 +66,8 @@ class WorkoutService:
         date_to: date | None = None,
         min_duration: int | None = None,
         max_duration: int | None = None,
+        page: int = 1,
+        size: int = 10,
     ) -> list[Workout]:
         """Получить список тренировок с фильтрацией"""
         all_workouts = self.repository.get_all()
@@ -70,6 +78,8 @@ class WorkoutService:
             date_to=date_to,
             min_duration=min_duration,
             max_duration=max_duration,
+            page=page,
+            size=size,
         )
     
     def get_workout_by_id(self, workout_id: int) -> Optional[Workout]:
