@@ -1,30 +1,31 @@
-# Сервис для статистики тренировок
-from app.repositories.stats_repository import stats_repository
 from app.schemas.workout import GymType
 from datetime import date
+from app.repositories import workouts
 
-class StatsService:
-    """Сервис для бизнес-логики тренировок"""
+
+class StatsRepository:
+    """Репозиторий для работы с тренировками (пока в памяти)"""
     
     def __init__(self):
         pass
     
     def get_global_trains_amount(self) -> int:
         """Получить общее количество тренировок"""
-        return stats_repository.get_global_trains_amount()
-    
+        return len(workouts)
+
     def get_global_trains_duration(self) -> int:
         """Получить общую длительность тренировок"""
-        return stats_repository.get_global_trains_duration()
-    
+        return sum(workout.duration for workout in workouts)
+
     def get_global_trains_by_type(self, type: GymType) -> int:
         """Получить количество тренировок по типу"""
-        return stats_repository.get_global_trains_by_type(type)
-    
+        return sum(1 for workout in workouts if workout.type == type)
+
     def get_global_trains_by_date(self, date: date) -> int:
         """Получить количество тренировок по дате"""
-        return stats_repository.get_global_trains_by_date(date)
+        return sum(1 for workout in workouts if workout.planned_date == date)
 
 
-# Глобальный экземпляр сервиса
-stats_service = StatsService()
+# Глобальный экземпляр репозитория (в будущем будет заменен на работу с БД)
+stats_repository = StatsRepository()
+
