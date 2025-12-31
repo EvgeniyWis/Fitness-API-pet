@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.services.stats_service import stats_service
-from app.schemas.workout import GymType
+from app.models.workout import GymType
 from datetime import date
 
 router = APIRouter()

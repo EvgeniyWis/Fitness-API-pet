@@ -1,6 +1,6 @@
 from typing import Optional
 from datetime import date
-from app.schemas.workout import Workout, WorkoutCreate, GymType
+from app.models.workout import Workout, GymType
 from app.repositories.workout_repository import workout_repository
 
 
@@ -55,7 +55,7 @@ class WorkoutService:
     def __init__(self, repository=workout_repository):
         self.repository = repository
     
-    def create_workout(self, workout_data: WorkoutCreate) -> Workout:
+    def create_workout(self, workout_data: Workout) -> Workout:
         """Создать новую тренировку"""
         return self.repository.create(workout_data)
     
@@ -86,7 +86,7 @@ class WorkoutService:
         """Получить тренировку по ID"""
         return self.repository.get_by_id(workout_id)
     
-    def update_workout(self, workout_id: int, workout_data: WorkoutCreate) -> Optional[Workout]:
+    def update_workout(self, workout_id: int, workout_data: Workout) -> Optional[Workout]:
         """Обновить тренировку"""
         return self.repository.update(workout_id, workout_data)
     

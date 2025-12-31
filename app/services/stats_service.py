@@ -1,14 +1,10 @@
 # Сервис для статистики тренировок
 from app.repositories.stats_repository import stats_repository
-from app.schemas.workout import GymType
+from app.models.workout import GymType
 from datetime import date
 
 class StatsService:
     """Сервис для бизнес-логики тренировок"""
-    
-    def __init__(self):
-        pass
-    
     def get_global_trains_amount(self) -> int:
         """Получить общее количество тренировок"""
         return stats_repository.get_global_trains_amount()

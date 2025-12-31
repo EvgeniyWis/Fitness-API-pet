@@ -1,16 +1,12 @@
 # Сервис для аутентификации и авторизации
 from app.repositories.auth_repository import auth_repository
-from app.schemas.user import UserCreate, User
+from app.models.user import User
 from app.security.hash_password import hash_password
 from app.security.create_access_token import create_access_token
 
 class AuthService:
     """Сервис для бизнес-логики тренировок"""
-    
-    def __init__(self):
-        pass
-    
-    def register(self, user_data: UserCreate) -> User:
+    def register(self, user_data: User) -> User:
         """Зарегистрировать нового пользователя"""
         # Хешируем пароль
         user_data.password = hash_password(user_data.password)

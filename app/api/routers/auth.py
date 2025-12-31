@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response, Depends  # Depends - механизм Dependency Injection для переиспользования логики
-from app.schemas.user import UserCreate, User
+from app.models.user import User
 from app.services.auth_service import auth_service
 from app.api.deps import get_current_user_from_cookie  # Dependency для автоматической авторизации по куки
 from app.security.cookie_utils import set_auth_cookie, delete_auth_cookie
@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.post("/register")
-async def register(user_data: UserCreate):
+async def register(user_data: User):
     """Регистрация нового пользователя"""
     return auth_service.register(user_data)
 

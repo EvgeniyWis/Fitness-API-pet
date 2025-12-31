@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from datetime import date
-from app.schemas.workout import Workout, WorkoutCreate, GymType
+from app.models.workout import Workout, GymType
 from app.services.workout_service import workout_service
 
 router = APIRouter()
 
 
 @router.post("", response_model=Workout, status_code=201)
-async def create_workout(workout_data: WorkoutCreate) -> Workout:
+async def create_workout(workout_data: Workout) -> Workout:
     """Создать новую тренировочную сессию"""
     return workout_service.create_workout(workout_data)
 
@@ -46,7 +46,7 @@ async def get_workout(workout_id: int) -> Workout:
 
 
 @router.put("/{workout_id}", response_model=Workout)
-async def update_workout(workout_id: int, workout_data: WorkoutCreate) -> Workout:
+async def update_workout(workout_id: int, workout_data: Workout) -> Workout:
     """Обновить тренировку"""
     workout = workout_service.update_workout(workout_id, workout_data)
 
