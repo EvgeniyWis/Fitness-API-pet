@@ -1,13 +1,17 @@
 from app.models.user import User
-from app.core.database import get_db_session
+from app.utils.db_decorator import with_db_session
+from sqlalchemy.orm import Session
 
 
 class UserRepository:
     """Репозиторий для работы с пользователями (пока в памяти)"""
-    def get_user_by_id(self, user_id: int) -> User:
+    @with_db_session()
+    def get_user_by_id(self, db: Session, user_id: int) -> User:
         """Получение пользователя по ID"""
-        with get_db_session() as db:
-            return db.query(User).filter(User.id == user_id).first()
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            db.expunge(user)
+        return user
 
 
 # Глобальный экземпляр репозитория (в будущем будет заменен на работу с БД)

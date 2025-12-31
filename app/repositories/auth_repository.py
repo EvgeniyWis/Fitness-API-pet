@@ -1,29 +1,29 @@
 from app.models.user import User
-from app.core.database import get_db_session
+from app.utils.db_decorator import with_db_session
+from sqlalchemy.orm import Session
 
 
 class AuthRepository:
     """Репозиторий для работы с аутентификацией (пока в памяти)"""
-    def register(self, user_data: User) -> bool:
+    @with_db_session()
+    def register(self, db: Session, user_data: User) -> bool:
         """Зарегистрировать нового пользователя"""
-        with get_db_session() as db:
-            user = User(
-                **user_data.model_dump(exclude={'id'})
-            )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-            db.expunge(user)
-            return True
+        user = User(
+            **user_data.model_dump(exclude={'id'})
+        )
+        db.add(user)
+        db.flush()  # Отправляем изменения в БД без коммита (коммит будет в декораторе)
+        db.refresh(user)
+        db.expunge(user)
+        return True
 
-    def login(self, username: str, password: str) -> User | None:
+    @with_db_session()
+    def login(self, db: Session, username: str, password: str) -> User | None:
         """Проверка учетных данных и возврат пользователя"""
-        with get_db_session() as db:
-            user = db.query(User).filter(User.username == username, User.password == password).first()
-            if user:
-                db.expunge(user)
-                return user
-
+        user = db.query(User).filter(User.username == username, User.password == password).first()
+        if user:
+            db.expunge(user)
+            return user
         return None
 
 
