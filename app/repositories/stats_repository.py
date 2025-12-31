@@ -1,29 +1,32 @@
-from app.schemas.workout import GymType
+from app.models.workout import GymType
 from datetime import date
-from app.repositories import workouts
+from app.core.database import get_db_session
+from app.models.workout import Workout
+from sqlalchemy import func
 
 
 class StatsRepository:
     """Репозиторий для работы с тренировками (пока в памяти)"""
-    
-    def __init__(self):
-        pass
-    
     def get_global_trains_amount(self) -> int:
         """Получить общее количество тренировок"""
-        return len(workouts)
+        with get_db_session() as db:
+            return db.query(Workout).count()
 
     def get_global_trains_duration(self) -> int:
         """Получить общую длительность тренировок"""
-        return sum(workout.duration for workout in workouts)
+        with get_db_session() as db:
+            result = db.query(func.sum(Workout.duration)).scalar()
+            return result
 
     def get_global_trains_by_type(self, type: GymType) -> int:
         """Получить количество тренировок по типу"""
-        return sum(1 for workout in workouts if workout.type == type)
+        with get_db_session() as db:
+            return db.query(Workout).filter(Workout.type == type).count()
 
     def get_global_trains_by_date(self, date: date) -> int:
         """Получить количество тренировок по дате"""
-        return sum(1 for workout in workouts if workout.planned_date == date)
+        with get_db_session() as db:
+            return db.query(Workout).filter(Workout.planned_date == date).count()
 
 
 # Глобальный экземпляр репозитория (в будущем будет заменен на работу с БД)
