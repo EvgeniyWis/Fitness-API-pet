@@ -11,7 +11,7 @@ class WorkoutService:
     def __init__(self, repository=workout_repository):
         self.repository = repository
     
-    def create_workout(self, workout_data: Workout, user_id: int) -> Workout:
+    def create_workout(self, workout_data: Workout) -> Workout:
         """Создать новую тренировку"""
         return self.repository.create(workout_data)
     
