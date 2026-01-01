@@ -1,12 +1,13 @@
 from app.models.user import User
 from app.utils.db_decorator import with_db_session
+from app.security.hash_password import verify_password
 from sqlalchemy.orm import Session
 
 
 class AuthRepository:
-    """Репозиторий для работы с аутентификацией (пока в памяти)"""
+    """Репозиторий для работы с аутентификацией"""
     @with_db_session()
-    def register(self, db: Session, user_data: User) -> bool:
+    def register(self, db: Session, user_data: User) -> User:
         """Зарегистрировать нового пользователя"""
         user = User(
             **user_data.model_dump(exclude={'id'})
@@ -15,13 +16,18 @@ class AuthRepository:
         db.flush()  # Отправляем изменения в БД без коммита (коммит будет в декораторе)
         db.refresh(user)
         db.expunge(user)
-        return True
+        return user
 
     @with_db_session()
     def login(self, db: Session, username: str, password: str) -> User | None:
-        """Проверка учетных данных и возврат пользователя"""
-        user = db.query(User).filter(User.username == username, User.password == password).first()
-        if user:
+        """
+        Проверка учетных данных и возврат пользователя.
+        
+        Сначала находит пользователя по username, затем проверяет пароль
+        используя verify_password для сравнения с хешем в БД.
+        """
+        user = db.query(User).filter(User.username == username).first()
+        if user and verify_password(password, user.password):
             db.expunge(user)
             return user
         return None
