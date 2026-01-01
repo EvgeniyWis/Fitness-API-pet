@@ -8,6 +8,7 @@ GymType = Literal["gym", "volleyball"]
 
 class Workout(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True, sa_column_kwargs={"autoincrement": True})
+    user_id: Optional[int] = Field(foreign_key="user.id")
     type: GymType = Field(sa_type=String) 
     duration: int = Field()
     repetitions: int = Field()
