@@ -1,13 +1,16 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from datetime import date
+from app.models.user import User
 from app.models.workout import Workout, GymType
 from app.services.workout_service import workout_service
+from app.api.deps import get_current_user_from_cookie
+
 
 router = APIRouter()
 
 
 @router.post("", response_model=Workout, status_code=201)
-async def create_workout(workout_data: Workout) -> Workout:
+async def create_workout(workout_data: Workout, current_user: User = Depends(get_current_user_from_cookie)) -> Workout:
     """Создать новую тренировочную сессию"""
     return workout_service.create_workout(workout_data)
 
@@ -21,9 +24,11 @@ async def get_workouts(
     max_duration: int | None = None,
     page: int = 1,
     size: int = 10,
+    current_user: User = Depends(get_current_user_from_cookie)
 ) -> list[Workout]:
     """Получить список тренировок с поддержкой фильтрации"""
     return workout_service.get_workouts(
+        user_id=current_user.id,
         type=type,
         date_from=date_from,
         date_to=date_to,
@@ -35,9 +40,9 @@ async def get_workouts(
 
 
 @router.get("/{workout_id}", response_model=Workout)
-async def get_workout(workout_id: int) -> Workout:
+async def get_workout(workout_id: int, current_user: User = Depends(get_current_user_from_cookie)) -> Workout:
     """Получить конкретную тренировку по ID"""
-    workout = workout_service.get_workout_by_id(workout_id)
+    workout = workout_service.get_workout_by_id(workout_id, current_user.id)
 
     if not workout:
         raise HTTPException(status_code=404, detail="Workout not found")
@@ -46,7 +51,7 @@ async def get_workout(workout_id: int) -> Workout:
 
 
 @router.put("/{workout_id}", response_model=Workout)
-async def update_workout(workout_id: int, workout_data: Workout) -> Workout:
+async def update_workout(workout_id: int, workout_data: Workout, current_user: User = Depends(get_current_user_from_cookie)) -> Workout:
     """Обновить тренировку"""
     workout = workout_service.update_workout(workout_id, workout_data)
 
@@ -57,7 +62,7 @@ async def update_workout(workout_id: int, workout_data: Workout) -> Workout:
 
 
 @router.delete("/{workout_id}", status_code=204)
-async def delete_workout(workout_id: int) -> None:
+async def delete_workout(workout_id: int, current_user: User = Depends(get_current_user_from_cookie)) -> None:
     """Удалить тренировку"""
     success = workout_service.delete_workout(workout_id)
     

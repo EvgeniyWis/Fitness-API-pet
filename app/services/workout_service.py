@@ -6,6 +6,7 @@ from app.repositories.workout_repository import workout_repository
 
 def filter_workouts(
     workouts: list[Workout],
+    user_id: int,
     type: GymType | None = None,
     date_from: date | None = None,
     date_to: date | None = None,
@@ -35,6 +36,7 @@ def filter_workouts(
     paged_result_list = result_list[page * size:(page + 1) * size]
     
     filters = [
+        (user_id, lambda x: x.user_id == user_id),
         (type, lambda x: x.type == type),
         (date_from, lambda x: x.planned_date is not None and date_from <= x.planned_date),
         (date_to, lambda x: x.planned_date is not None and x.planned_date <= date_to),
@@ -55,12 +57,13 @@ class WorkoutService:
     def __init__(self, repository=workout_repository):
         self.repository = repository
     
-    def create_workout(self, workout_data: Workout) -> Workout:
+    def create_workout(self, workout_data: Workout, user_id: int) -> Workout:
         """Создать новую тренировку"""
         return self.repository.create(workout_data)
     
     def get_workouts(
         self,
+        user_id: int,
         type: GymType | None = None,
         date_from: date | None = None,
         date_to: date | None = None,
@@ -73,6 +76,7 @@ class WorkoutService:
         all_workouts = self.repository.get_all()
         return filter_workouts(
             all_workouts,
+            user_id=user_id,
             type=type,
             date_from=date_from,
             date_to=date_to,
