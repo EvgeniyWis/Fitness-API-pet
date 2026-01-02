@@ -1,31 +1,40 @@
-from fastapi import Response
-from app.core.config import settings
+from fastapi import Response, Request
 
 
-def set_auth_cookie(response: Response, token: str) -> None:
+def set_cookie(response: Response, value: str, key: str, max_age: int) -> None:
     """
-    Устанавливает JWT токен в HTTP-only cookie
+    Устанавливает токен в HTTP-only cookie
     
     Args:
         response: FastAPI Response объект
-        token: JWT токен для установки в cookie
+        token: токен для установки в cookie
     """
     response.set_cookie(
-        key="access_token",
-        value=token,
+        key=key,
+        value=value,
         httponly=True,  # Защита от XSS атак
         secure=True,    # Только HTTPS (в production)
         samesite="lax", # Защита от CSRF атак
-        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60  # Время жизни в секундах
+        max_age=max_age  # Время жизни в секундах
     )
 
 
-def delete_auth_cookie(response: Response) -> None:
+def delete_cookie(response: Response, key: str) -> None:
     """
-    Удаляет JWT токен из cookie
+    Удаляет токен из cookie
     
     Args:
         response: FastAPI Response объект
     """
-    response.delete_cookie(key="access_token")
+    response.delete_cookie(key=key)
 
+
+async def get_cookie(request: Request, key: str) -> str | None:
+    """
+    Получает значение токена из cookie
+    
+    Args:
+        request: FastAPI Request объект
+        key: ключ токена
+    """
+    return request.cookies.get(key)
