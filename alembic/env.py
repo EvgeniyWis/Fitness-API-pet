@@ -15,7 +15,7 @@ from app.core.config import settings
 from sqlmodel import SQLModel
 
 # Импортируем все модели, чтобы они зарегистрировались в SQLModel.metadata
-from app.models import user, workout, refresh_token
+from app.models import user, workout
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

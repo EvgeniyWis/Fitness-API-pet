@@ -1,7 +1,6 @@
 from app.models.user import User
 from app.utils.db_decorator import with_db_session
 from sqlalchemy.orm import Session
-from app.models.refresh_token import RefreshToken
 
 
 class UserRepository:

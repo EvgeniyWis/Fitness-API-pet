@@ -7,7 +7,7 @@ from sqlmodel import SQLModel
 from app.core.config import settings
 
 # Импортируем модели, чтобы они зарегистрировались в SQLModel.metadata
-from app.models import workout, user, refresh_token
+from app.models import workout, user
 
 # Создание engine для подключения к БД
 engine = create_engine(

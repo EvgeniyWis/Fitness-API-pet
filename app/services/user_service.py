@@ -1,5 +1,4 @@
 # Сервис для аутентификации и авторизации
-from app.models.refresh_token import RefreshToken
 from app.repositories.user_repository import user_repository
 from app.models.user import User
 
