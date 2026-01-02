@@ -4,18 +4,25 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Настройки приложения"""
     
-    PROJECT_NAME: str = "Fitness API"
-    VERSION: str = "1.0.0"
-    API_PREFIX: str = "/api"
+    PROJECT_NAME: str
+    VERSION: str
+    API_PREFIX: str
     
     # Database
-    DATABASE_URL: str = "sqlite:///./fitness.db"
+    DATABASE_URL: str
     
     # Security
-    SECRET_KEY: str = "your-secret-key-change-in-production"
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 30 # 30 дней
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    REFRESH_TOKEN_EXPIRE_MINUTES: int
+    
+    # Redis
+    REDIS_HOST: str
+    REDIS_PORT: int
+    REDIS_USERNAME: str
+    REDIS_PASSWORD: str
+    REDIS_DB: int
     
     model_config = SettingsConfigDict(env_file=".env")
 
