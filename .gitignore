@@ -3,3 +3,4 @@ api.http
 *.db
 alembic/versions
 .env
+logs/

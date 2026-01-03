@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: str
     REDIS_DB: int
     
+    # Logging
+    LOG_LEVEL: str  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    
     model_config = SettingsConfigDict(env_file=".env")
 
 
