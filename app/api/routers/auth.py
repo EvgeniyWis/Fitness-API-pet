@@ -39,6 +39,11 @@ async def logout(request: Request, response: Response):
     if refresh_token:
         jwt_tokens_service.invalidate_refresh_token(refresh_token)
 
+    # Инвалидируем Access токен
+    access_token = await get_cookie(request, "access_token")
+    if access_token:
+        jwt_tokens_service.invalidate_access_token(access_token)
+
     # Удаляем токены из куки
     delete_cookie(response, "access_token")
     delete_cookie(response, "refresh_token")

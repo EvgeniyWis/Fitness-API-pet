@@ -3,46 +3,58 @@ from app.repositories.jwt_tokens_repository import jwt_tokens_repository
 from app.security.create_jwt_token import create_jwt_token
 from app.core.config import settings
 from datetime import datetime
-from app.models.jwt_tokens import RefreshToken
+from app.models.jwt_tokens import JWTToken, TokenType
 
 
 class JWTTokensService:
     """Сервис для бизнес-логики JWT токенов"""
     
-    def create_refresh_token(self, user_id: int, token: str) -> RefreshToken:
+    def create_refresh_token(self, user_id: int, token: str) -> JWTToken:
         """Создание refresh токена"""
         return jwt_tokens_repository.create_refresh_token(user_id, token)
 
+    def _check_token_exists(self, token: str, token_type: TokenType) -> bool:
+        """Универсальная проверка наличия токена в БД"""
+        jwt_token = jwt_tokens_repository.get_token_by_hash(token, token_type)
+        return jwt_token is not None
+
+    def _check_token_expired(self, token: str, token_type: TokenType) -> bool:
+        """Универсальная проверка того не истёк ли токен и не инвалидирован ли он"""
+        # Получаем сам токен из БД
+        jwt_token: JWTToken | None = jwt_tokens_repository.get_token_by_hash(token, token_type)
+        
+        # Если токен не найден, то возвращаем True (считаем истекшим)
+        if not jwt_token:
+            return True
+
+        # Проверяем не истёк ли токен
+        is_expired = jwt_token.expires_at < datetime.now()
+        
+        # Если истёк, то инвалидируем токен
+        if is_expired:
+            self._invalidate_token(token, token_type)
+
+        # Проверяем не инвалидирован ли токен
+        is_revoked = jwt_token.revoked
+
+        # Возвращаем True, если токен истёк или инвалидирован
+        return is_expired or is_revoked
+
+    def _invalidate_token(self, token: str, token_type: TokenType) -> bool:
+        """Универсальная инвалидация токена"""
+        return jwt_tokens_repository.update_token_revoked(token, token_type, revoked=True)
+
     def check_refresh_token_exists(self, token: str) -> bool:
         """Проверка наличия Refresh токена в БД"""
-        refresh_token = jwt_tokens_repository.get_refresh_token_by_hash(token)
-        return refresh_token is not None
+        return self._check_token_exists(token, "refresh_token")
 
     def check_refresh_token_expired(self, token: str) -> bool:
         """Проверка того не истёк ли Refresh токен и не инвалидирован ли он"""
-        # Получаем сам токен из БД
-        refresh_token: RefreshToken | None = jwt_tokens_repository.get_refresh_token_by_hash(token)
-        
-        # Если токен не найден, то возвращаем True (считаем истекшим)
-        if not refresh_token:
-            return True
-
-        # Проверяем не истёк ли Refresh токен
-        is_expired = refresh_token.expires_at < datetime.now()
-        
-        # Если истёк, то инвалидируем Refresh токен
-        if is_expired:
-            self.invalidate_refresh_token(token)
-
-        # Проверяем не инвалидирован ли Refresh токен
-        is_revoked = refresh_token.revoked
-
-        # Возвращаем True, если Refresh токен истёк или инвалидирован
-        return is_expired or is_revoked
+        return self._check_token_expired(token, "refresh_token")
 
     def invalidate_refresh_token(self, token: str) -> bool:
         """Инвалидация Refresh токена"""
-        return jwt_tokens_repository.update_refresh_token_revoked(token, revoked=True)
+        return self._invalidate_token(token, "refresh_token")
 
     async def get_access_token_by_refresh_token(self, user_id: int, token: str) -> str | dict:
         """Получение Access токена по Refresh токену"""
@@ -61,6 +73,18 @@ class JWTTokensService:
         jwt_tokens_repository.create_access_token(user_id, access_token)
         
         return access_token
+
+    def check_access_token_exists(self, token: str) -> bool:
+        """Проверка наличия Access токена в БД"""
+        return self._check_token_exists(token, "access_token")
+
+    def check_access_token_expired(self, token: str) -> bool:
+        """Проверка того не истёк ли Access токен и не инвалидирован ли он"""
+        return self._check_token_expired(token, "access_token")
+
+    def invalidate_access_token(self, token: str) -> bool:
+        """Инвалидация Access токена"""
+        return self._invalidate_token(token, "access_token")
 
 # Глобальный экземпляр сервиса
 jwt_tokens_service = JWTTokensService()
