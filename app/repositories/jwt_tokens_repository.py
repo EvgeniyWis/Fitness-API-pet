@@ -1,7 +1,7 @@
 from app.core.config import settings
 from app.core.redis import get_redis
 from app.security.token import hash_token
-from app.models.refresh_token import RefreshToken, RefreshToken
+from app.models.jwt_tokens import RefreshToken, RefreshToken, TokenType
 from datetime import datetime, timedelta
 from typing import Optional
 import json
@@ -10,19 +10,21 @@ import json
 class JWTTokensRepository:
     """Репозиторий для работы с JWT токенами (только CRUD операции)"""
 
-    def _get_redis_key(self, token_hash: str) -> str:
+    def _get_redis_key(self, token_type: TokenType, token_hash: str) -> str:
         """Получить ключ Redis для токена"""
-        return f"refresh_token:{token_hash}"
+        return f"{token_type}:{token_hash}"
 
-    def _serialize_refresh_token(self, user_id: int, token_hash: str, expires_at: datetime, created_at: datetime, revoked: bool) -> dict:
-        """Сериализация данных refresh токена для хранения в Redis"""
-        return {
+    def _serialize_token_data(self, user_id: int, token_hash: str, expires_at: datetime, created_at: datetime, include_revoked: bool = False, revoked: bool = False) -> dict:
+        """Сериализация данных токена для хранения в Redis"""
+        token_data = {
             "user_id": user_id,
             "token_hash": token_hash,
             "expires_at": expires_at.isoformat(),
-            "created_at": created_at.isoformat(),
-            "revoked": revoked
+            "created_at": created_at.isoformat()
         }
+        if include_revoked:
+            token_data["revoked"] = revoked
+        return token_data
 
     def _deserialize_refresh_token(self, data: dict) -> RefreshToken:
         """Десериализация данных refresh токена из Redis"""
@@ -34,29 +36,38 @@ class JWTTokensRepository:
             revoked=data.get("revoked", False)
         )
 
-    # Создание refresh токена
-    def create_refresh_token(self, user_id: int, token: str) -> RefreshToken:
-        """Создание refresh токена"""
+    def _save_token_to_redis(self, token_type: TokenType, user_id: int, token: str, expire_minutes: int) -> tuple[str, datetime, datetime]:
+        """Общий метод для сохранения токена в Redis"""
         redis = get_redis()
         token_hash = hash_token(token)
         created_at = datetime.now()
-        expires_at = created_at + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+        expires_at = created_at + timedelta(minutes=expire_minutes)
         
-        # Сериализуем данные
-        token_data = self._serialize_refresh_token(
+        # Сериализуем данные (для refresh токенов включаем поле revoked)
+        token_data = self._serialize_token_data(
             user_id=user_id,
             token_hash=token_hash,
             expires_at=expires_at,
             created_at=created_at,
+            include_revoked=(token_type == "refresh_token"),
             revoked=False
         )
         
         # Сохраняем в Redis
-        redis_key = self._get_redis_key(token_hash)
+        redis_key = self._get_redis_key(token_type, token_hash)
         redis.setex(
             redis_key,
             int((expires_at - created_at).total_seconds()),
             json.dumps(token_data)
+        )
+        
+        return token_hash, created_at, expires_at
+
+    # Создание refresh токена
+    def create_refresh_token(self, user_id: int, token: str) -> RefreshToken:
+        """Создание refresh токена"""
+        token_hash, created_at, expires_at = self._save_token_to_redis(
+            "refresh_token", user_id, token, settings.REFRESH_TOKEN_EXPIRE_MINUTES
         )
         
         # Возвращаем объект RefreshToken
@@ -73,7 +84,7 @@ class JWTTokensRepository:
         """Получение refresh токена по хешу токена"""
         redis = get_redis()
         token_hash = hash_token(token)
-        redis_key = self._get_redis_key(token_hash)
+        redis_key = self._get_redis_key("refresh_token", token_hash)
         
         # Получаем данные из Redis
         token_data_str = redis.get(redis_key)
@@ -90,7 +101,7 @@ class JWTTokensRepository:
         """Обновление статуса revoked для refresh токена"""
         redis = get_redis()
         token_hash = hash_token(token)
-        redis_key = self._get_redis_key(token_hash)
+        redis_key = self._get_redis_key("refresh_token", token_hash)
         
         # Получаем данные из Redis
         token_data_str = redis.get(redis_key)
@@ -119,6 +130,13 @@ class JWTTokensRepository:
         redis.setex(redis_key, ttl, json.dumps(token_data))
         
         return True
+
+    # Создание access токена
+    def create_access_token(self, user_id: int, token: str) -> None:
+        """Создание access токена и сохранение в Redis"""
+        self._save_token_to_redis(
+            "access_token", user_id, token, settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
 
 # Глобальный экземпляр репозитория
 jwt_tokens_repository = JWTTokensRepository()

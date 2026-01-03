@@ -3,7 +3,7 @@ from app.repositories.jwt_tokens_repository import jwt_tokens_repository
 from app.security.create_jwt_token import create_jwt_token
 from app.core.config import settings
 from datetime import datetime
-from app.models.refresh_token import RefreshToken
+from app.models.jwt_tokens import RefreshToken
 
 
 class JWTTokensService:
@@ -56,6 +56,9 @@ class JWTTokensService:
 
         # Генерируем Access токен
         access_token = create_jwt_token(user_id, settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        
+        # Сохраняем Access токен в Redis
+        jwt_tokens_repository.create_access_token(user_id, access_token)
         
         return access_token
 
