@@ -1,6 +1,6 @@
 # Сервис для аутентификации и авторизации
 from app.repositories.auth_repository import auth_repository
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.security.password import hash_password
 from app.security.create_jwt_token import create_jwt_token
 from app.core.config import settings
@@ -11,6 +11,10 @@ class AuthService:
     """Сервис для бизнес-логики аутентификации"""
     def register(self, user_data: User) -> User:
         """Зарегистрировать нового пользователя"""
+        # Если username и password соответствуют настройкам админа, выдаём админские права
+        if user_data.username == settings.ADMIN_USERNAME and user_data.password == settings.ADMIN_PASSWORD:
+            user_data.role = UserRole.ADMIN
+        
         # Хешируем пароль перед сохранением
         user_data.password = hash_password(user_data.password)
         return auth_repository.register(user_data)

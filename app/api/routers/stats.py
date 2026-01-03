@@ -1,13 +1,19 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from app.services.stats_service import stats_service
 from app.models.workout import GymType
+from app.api.deps import get_current_admin_user_from_cookie
+from app.models.user import User
 from datetime import date
 
 router = APIRouter()
 
 
 @router.get("")
-async def get_stats(type: GymType | None = None, date: date | None = None):
+async def get_stats(
+    type: GymType | None = None, 
+    date: date | None = None,
+    current_user: User = Depends(get_current_admin_user_from_cookie)
+):
     """Получить статистику по тренировкам"""
     # Получаем статистику
     global_trains_amount = stats_service.get_global_trains_amount()
