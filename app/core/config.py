@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_MINUTES: int
     
+    # Admin credentials for auto-role assignment
+    ADMIN_USERNAME: str
+    ADMIN_PASSWORD: str
+    
     # Redis
     REDIS_HOST: str
     REDIS_PORT: int
