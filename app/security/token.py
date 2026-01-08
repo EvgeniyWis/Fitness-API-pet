@@ -1,5 +1,7 @@
 import hashlib
+
 from app.core.config import settings
+
 
 def hash_token(token: str) -> str:
     """Хеширование токена"""

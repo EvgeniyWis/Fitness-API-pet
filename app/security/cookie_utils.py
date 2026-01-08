@@ -1,10 +1,10 @@
-from fastapi import Response, Request
+from fastapi import Request, Response
 
 
 def set_cookie(response: Response, value: str, key: str, max_age: int) -> None:
     """
     Устанавливает токен в HTTP-only cookie
-    
+
     Args:
         response: FastAPI Response объект
         token: токен для установки в cookie
@@ -13,16 +13,16 @@ def set_cookie(response: Response, value: str, key: str, max_age: int) -> None:
         key=key,
         value=value,
         httponly=True,  # Защита от XSS атак
-        secure=True,    # Только HTTPS (в production)
-        samesite="lax", # Защита от CSRF атак
-        max_age=max_age  # Время жизни в секундах
+        secure=True,  # Только HTTPS (в production)
+        samesite="lax",  # Защита от CSRF атак
+        max_age=max_age,  # Время жизни в секундах
     )
 
 
 def delete_cookie(response: Response, key: str) -> None:
     """
     Удаляет токен из cookie
-    
+
     Args:
         response: FastAPI Response объект
     """
@@ -32,7 +32,7 @@ def delete_cookie(response: Response, key: str) -> None:
 async def get_cookie(request: Request, key: str) -> str | None:
     """
     Получает значение токена из cookie
-    
+
     Args:
         request: FastAPI Request объект
         key: ключ токена

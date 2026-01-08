@@ -1,10 +1,12 @@
+from sqlalchemy.orm import Session
+
 from app.models.user import User
 from app.utils.db_decorator import with_db_session
-from sqlalchemy.orm import Session
 
 
 class UserRepository:
     """Репозиторий для работы с пользователями (пока в памяти)"""
+
     @with_db_session()
     def get_user_by_id(self, db: Session, user_id: int) -> User:
         """Получение пользователя по ID"""
@@ -24,4 +26,3 @@ class UserRepository:
 
 # Глобальный экземпляр репозитория (в будущем будет заменен на работу с БД)
 user_repository = UserRepository()
-

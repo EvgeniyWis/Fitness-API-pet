@@ -6,4 +6,3 @@ def convert_date_string(date_value):
     if isinstance(date_value, str):
         return date.fromisoformat(date_value)
     return date_value
-

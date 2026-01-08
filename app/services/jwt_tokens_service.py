@@ -1,14 +1,15 @@
 # Сервис для бизнес-логики JWT токенов
+from datetime import datetime
+
+from app.core.config import settings
+from app.models.jwt_tokens import JWTToken, TokenType
 from app.repositories.jwt_tokens_repository import jwt_tokens_repository
 from app.security.create_jwt_token import create_jwt_token
-from app.core.config import settings
-from datetime import datetime
-from app.models.jwt_tokens import JWTToken, TokenType
 
 
 class JWTTokensService:
     """Сервис для бизнес-логики JWT токенов"""
-    
+
     def create_refresh_token(self, user_id: int, token: str) -> JWTToken:
         """Создание refresh токена"""
         return jwt_tokens_repository.create_refresh_token(user_id, token)
@@ -22,14 +23,14 @@ class JWTTokensService:
         """Универсальная проверка того не истёк ли токен и не инвалидирован ли он"""
         # Получаем сам токен из БД
         jwt_token: JWTToken | None = jwt_tokens_repository.get_token_by_hash(token, token_type)
-        
+
         # Если токен не найден, то возвращаем True (считаем истекшим)
         if not jwt_token:
             return True
 
         # Проверяем не истёк ли токен
         is_expired = jwt_token.expires_at < datetime.now()
-        
+
         # Если истёк, то инвалидируем токен
         if is_expired:
             self._invalidate_token(token, token_type)
@@ -68,10 +69,10 @@ class JWTTokensService:
 
         # Генерируем Access токен
         access_token = create_jwt_token(user_id, settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        
+
         # Сохраняем Access токен в Redis
         jwt_tokens_repository.create_access_token(user_id, access_token)
-        
+
         return access_token
 
     def check_access_token_exists(self, token: str) -> bool:
@@ -85,6 +86,7 @@ class JWTTokensService:
     def invalidate_access_token(self, token: str) -> bool:
         """Инвалидация Access токена"""
         return self._invalidate_token(token, "access_token")
+
 
 # Глобальный экземпляр сервиса
 jwt_tokens_service = JWTTokensService()

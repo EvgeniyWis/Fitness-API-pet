@@ -1,14 +1,15 @@
-from typing import Optional, Literal
 from datetime import datetime
-from pydantic import BaseModel
+from typing import Literal
 
+from pydantic import BaseModel
 
 TokenType = Literal["refresh_token", "access_token"]
 
 
 class JWTToken(BaseModel):
     """Универсальный класс для представления данных JWT токена из Redis"""
-    id: Optional[int] = None
+
+    id: int | None = None
     user_id: int
     token_type: TokenType
     token_hash: str

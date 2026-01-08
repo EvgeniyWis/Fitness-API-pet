@@ -1,13 +1,15 @@
-from app.models.workout import GymType
 from datetime import date
-from app.models.workout import Workout
+
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+
+from app.models.workout import GymType, Workout
 from app.utils.db_decorator import with_db_session
 
 
 class StatsRepository:
     """Репозиторий для работы с тренировками (пока в памяти)"""
+
     @with_db_session()
     def get_global_trains_amount(self, db: Session) -> int:
         """Получить общее количество тренировок"""
@@ -32,4 +34,3 @@ class StatsRepository:
 
 # Глобальный экземпляр репозитория (в будущем будет заменен на работу с БД)
 stats_repository = StatsRepository()
-
