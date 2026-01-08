@@ -4,3 +4,5 @@ api.http
 alembic/versions
 .env
 logs/
+.ruff_cache/
+.venv/
