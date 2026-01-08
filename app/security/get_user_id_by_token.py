@@ -19,4 +19,6 @@ def get_user_id_by_token(token: str) -> int:
     except ExpiredSignatureError as err:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Токен истек") from err
     except InvalidTokenError as err:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Невалидный токен") from err
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Невалидный токен"
+        ) from err
