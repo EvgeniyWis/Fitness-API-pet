@@ -35,6 +35,7 @@ exclude = [
     ".env",
     "alembic/versions",
     "*.pyc",
+    "../frontend",
 ]
 
 [tool.ruff.lint]

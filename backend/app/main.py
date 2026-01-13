@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.middleware import logging_middleware
 from app.api.routers import api_router
@@ -34,6 +35,17 @@ def create_app() -> FastAPI:
         version=settings.VERSION,
         description="REST API для трекинга тренировок в тренажерном зале и волейболе",
         lifespan=lifespan,
+    )
+
+    # Настройка CORS для работы с фронтендом
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://localhost:3000",  # Next.js dev server
+        ],
+        allow_credentials=True,  # Для работы с cookies (JWT токены)
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     # Подключаем middleware для логирования
