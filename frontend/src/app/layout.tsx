@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { MainLayout } from "@/widgets/layout/main-layout/ui";
 
 export const metadata: Metadata = {
   title: "Fitness App",
@@ -12,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="ru">
+      <body>
+        <MainLayout>{children}</MainLayout>
+      </body>
     </html>
   );
 }
