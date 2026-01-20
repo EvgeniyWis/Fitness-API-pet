@@ -1,1 +1,1 @@
-// UI компонент формы входа
+export { LoginForm } from "./login-form";

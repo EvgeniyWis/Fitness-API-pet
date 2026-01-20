@@ -1,1 +1,1 @@
-// UI компонент формы регистрации
+export { RegisterForm } from "./register-form";
