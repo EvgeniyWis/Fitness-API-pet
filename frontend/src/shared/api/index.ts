@@ -7,4 +7,5 @@ export {
   type RegisterResponse,
   type LoginRequest,
   type LoginResponse,
+  useLogoutMutation
 } from "./authApi";
