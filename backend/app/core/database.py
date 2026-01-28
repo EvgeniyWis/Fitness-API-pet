@@ -9,6 +9,9 @@ from sqlmodel import SQLModel
 from app.core.config import settings
 
 # Импортируем модели, чтобы они зарегистрировались в SQLModel.metadata
+from app.models.jwt_token_record import JWTTokenRecord  # noqa: F401
+from app.models.user import User  # noqa: F401
+from app.models.workout import Workout  # noqa: F401
 
 # Создание engine для подключения к БД
 engine = create_engine(

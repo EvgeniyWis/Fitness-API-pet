@@ -1,8 +1,11 @@
+import logging
+
 from fastapi import (  # Depends - механизм Dependency Injection для переиспользования логики
     APIRouter,
     Request,
     Response,
 )
+from pydantic import BaseModel
 
 from app.core.config import settings
 from app.models.user import User
@@ -13,18 +16,28 @@ from app.services.auth_service import auth_service
 from app.services.jwt_tokens_service import jwt_tokens_service
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+
+class LoginRequest(BaseModel):
+    """Тело запроса на вход"""
+
+    username: str
+    password: str
 
 
 @router.post("/register")
 async def register(user_data: User):
     """Регистрация нового пользователя"""
-    return auth_service.register(user_data)
+    result = auth_service.register(user_data)
+    logger.info("Регистрация успешна: username=%s", user_data.username)
+    return result
 
 
 @router.post("/login")
-async def login(username: str, password: str, response: Response):
+async def login(credentials: LoginRequest, response: Response):
     """Авторизация пользователя"""
-    tokens = await auth_service.login(username, password)
+    tokens = await auth_service.login(credentials.username, credentials.password)
 
     if tokens:
         access_token, refresh_token = tokens
@@ -34,12 +47,14 @@ async def login(username: str, password: str, response: Response):
         set_cookie(
             response, refresh_token, "refresh_token", settings.REFRESH_TOKEN_EXPIRE_MINUTES * 60
         )
+        logger.info("Вход успешен: username=%s", credentials.username)
         return {
             "message": "Успешный вход в систему",
             "access_token": access_token,
             "refresh_token": refresh_token,
         }
 
+    logger.warning("Вход отклонён: username=%s, причина=неверные учётные данные", credentials.username)
     return {"message": "Неверные учетные данные"}
 
 

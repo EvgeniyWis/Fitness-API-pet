@@ -2,21 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { Button, Input, AuthFormContainer } from "@/shared/ui";
+import { useLoginMutation } from "@/shared/api";
 import { validateEmail, validatePassword } from "@/shared/lib";
 
 export const LoginForm = () => {
+  const router = useRouter();
+  const [login, { isLoading }] = useLoginMutation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setErrors({});
+    setSubmitError(null);
+    setSuccessMessage(null);
 
     const newErrors: { email?: string; password?: string } = {};
     const emailError = validateEmail(email);
@@ -27,8 +33,19 @@ export const LoginForm = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setIsLoading(false);
       return;
+    }
+
+    const result = await login({
+      username: email,
+      password,
+    }).unwrap();
+    if (result.message) {
+      setSuccessMessage("Вход выполнен успешно. Перенаправление...");
+      console.info("[Auth] Вход успешен:", email);
+      setTimeout(() => router.push("/"), 1500);
+    } else {
+      setSubmitError(result.message ?? "Ошибка входа");
     }
   };
 
@@ -61,6 +78,17 @@ export const LoginForm = () => {
           disabled={isLoading}
           autoComplete="current-password"
         />
+
+        {successMessage && (
+          <p className="text-sm text-green-600 font-medium" role="status">
+            {successMessage}
+          </p>
+        )}
+        {submitError && (
+          <p className="text-sm text-red-600" role="alert">
+            {submitError}
+          </p>
+        )}
 
         <div className="flex items-center justify-between">
           <label className="flex items-center">

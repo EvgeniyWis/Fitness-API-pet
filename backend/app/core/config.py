@@ -21,12 +21,13 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str
     ADMIN_PASSWORD: str
 
-    # Redis
-    REDIS_HOST: str
-    REDIS_PORT: int
-    REDIS_USERNAME: str
-    REDIS_PASSWORD: str
-    REDIS_DB: int
+    # Redis (при REDIS_ENABLED=false токены хранятся в БД, подключение не создаётся)
+    REDIS_ENABLED: bool = False
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_USERNAME: str = "default"
+    REDIS_PASSWORD: str = ""
+    REDIS_DB: int = 0
 
     # Logging
     LOG_LEVEL: str  # DEBUG, INFO, WARNING, ERROR, CRITICAL

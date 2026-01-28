@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/router";
 import { Button, Input, AuthFormContainer } from "@/shared/ui";
+import { useRegisterMutation } from "@/shared/api";
 import {
   validateEmail,
   validatePassword,
@@ -10,6 +12,8 @@ import {
 } from "@/shared/lib";
 
 export const RegisterForm = () => {
+  const router = useRouter();
+  const [register, { isLoading }] = useRegisterMutation();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -22,7 +26,8 @@ export const RegisterForm = () => {
     confirmPassword?: string;
     name?: string;
   }>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,8 +40,9 @@ export const RegisterForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setErrors({});
+    setSubmitError(null);
+    setSuccessMessage(null);
 
     const newErrors: typeof errors = {};
     const nameError = validateName(formData.name);
@@ -54,9 +60,18 @@ export const RegisterForm = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setIsLoading(false);
       return;
     }
+
+      const result = await register({
+        username: formData.email,
+        password: formData.password,
+      }).unwrap();
+      if (result.message?.includes("успешно")) {
+        router.push("/login");
+      } else {
+        setSubmitError(result.message ?? "Ошибка регистрации");
+      }
   };
 
   return (
@@ -114,6 +129,17 @@ export const RegisterForm = () => {
           disabled={isLoading}
           autoComplete="new-password"
         />
+
+        {successMessage && (
+          <p className="text-sm text-green-600 font-medium" role="status">
+            {successMessage}
+          </p>
+        )}
+        {submitError && (
+          <p className="text-sm text-red-600" role="alert">
+            {submitError}
+          </p>
+        )}
 
         <Button
           type="submit"

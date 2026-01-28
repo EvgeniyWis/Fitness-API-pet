@@ -23,14 +23,16 @@ def get_redis() -> Redis:
     return redis_client
 
 
-def init_redis() -> Redis:
+def init_redis() -> Redis | None:
     """
     Инициализировать подключение к Redis.
-
-    Returns:
-        Redis: Экземпляр клиента Redis
+    При REDIS_ENABLED=false подключение не создаётся — токены хранятся в БД.
     """
     global redis_client
+
+    if not settings.REDIS_ENABLED:
+        print("○ Redis отключён (REDIS_ENABLED=false), токены хранятся в БД")
+        return None
 
     # Собираем URL из отдельных параметров
     redis_url = f"redis://{settings.REDIS_USERNAME}:{settings.REDIS_PASSWORD}@{settings.REDIS_HOST}:{settings.REDIS_PORT}/{settings.REDIS_DB}"
