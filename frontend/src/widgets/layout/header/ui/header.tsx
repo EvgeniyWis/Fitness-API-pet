@@ -22,9 +22,17 @@ export const Header = () => {
 
           <nav className="flex items-center gap-4">
             {isAuthenticated ? (
-              <Button variant="primary" size="md" onClick={handleLogout}>
-                Выйти
-              </Button>
+              <>
+                <Link
+                  href="/workouts"
+                  className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                >
+                  Тренировки
+                </Link>
+                <Button variant="primary" size="md" onClick={handleLogout}>
+                  Выйти
+                </Button>
+              </>
             ) : (
               <>
                 <Link href="/login">
