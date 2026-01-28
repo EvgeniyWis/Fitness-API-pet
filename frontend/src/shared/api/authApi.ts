@@ -23,6 +23,12 @@ export interface LoginResponse {
   refresh_token?: string;
 }
 
+export interface RefreshResponse {
+  message?: string;
+  access_token?: string;
+  refresh_token?: string;
+}
+
 export const authApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     register: build.mutation<RegisterResponse, RegisterRequest>({
@@ -45,7 +51,18 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
       }),
     }),
+    refresh: build.mutation<RefreshResponse, void>({
+      query: () => ({
+        url: "/auth/refresh",
+        method: "POST",
+      }),
+    }),
   }),
 });
 
-export const { useRegisterMutation, useLoginMutation, useLogoutMutation } = authApi;
+export const {
+  useRegisterMutation,
+  useLoginMutation,
+  useLogoutMutation,
+  useRefreshMutation,
+} = authApi;

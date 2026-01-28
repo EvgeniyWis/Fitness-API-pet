@@ -12,8 +12,9 @@ export const LoginForm = () => {
   const [login, { isLoading }] = useLoginMutation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {}
+    {},
   );
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -41,6 +42,11 @@ export const LoginForm = () => {
       password,
     }).unwrap();
     if (result.message) {
+      if (rememberMe) {
+        localStorage.setItem("rememberMe", "1");
+      } else {
+        localStorage.removeItem("rememberMe");
+      }
       setSuccessMessage("Вход выполнен успешно. Перенаправление...");
       console.info("[Auth] Вход успешен:", email);
       setTimeout(() => router.push("/"), 1500);
@@ -95,6 +101,8 @@ export const LoginForm = () => {
             <input
               type="checkbox"
               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
             />
             <span className="ml-2 text-sm text-gray-600">Запомнить меня</span>
           </label>

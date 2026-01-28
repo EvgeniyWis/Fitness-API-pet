@@ -41,22 +41,32 @@ const userSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    const applyAccessToken = (state: UserState, accessToken?: string) => {
+      if (!accessToken) return;
+      try {
+        const decodedToken = jwtDecode<UserData>(accessToken);
+        state.isAuthenticated = true;
+        state.username = decodedToken.sub;
+        state.role = decodedToken.role;
+      } catch (error) {
+        console.error("Ошибка декодирования токена:", error);
+        state.isAuthenticated = false;
+        state.username = null;
+        state.role = null;
+      }
+    };
+
     builder.addMatcher(
       authApi.endpoints.login.matchFulfilled,
       (state, { payload }) => {
-        if (payload.access_token) {
-          try {
-            const decodedToken = jwtDecode<UserData>(payload.access_token);
-            state.isAuthenticated = true;
-            state.username = decodedToken.sub;
-            state.role = decodedToken.role;
-          } catch (error) {
-            console.error("Ошибка декодирования токена:", error);
-            state.isAuthenticated = false;
-            state.username = null;
-            state.role = null;
-          }
-        }
+        applyAccessToken(state, payload.access_token);
+      },
+    );
+
+    builder.addMatcher(
+      authApi.endpoints.refresh.matchFulfilled,
+      (state, { payload }) => {
+        applyAccessToken(state, payload.access_token);
       },
     );
     builder.addMatcher(authApi.endpoints.logout.matchFulfilled, (state) => {
