@@ -1,20 +1,36 @@
 // Виджет списка тренировок
 import { useGetWorkoutsQuery } from "@/entities/workout/api";
+import type { GymType } from "@/entities/workout/model";
 
 interface WorkoutListProps {
   page: number;
   pageSize: number;
   onPageChange: (page: number) => void;
+  typeFilter?: GymType;
+  dateFrom?: string;
+  dateTo?: string;
+  minDuration?: number;
+  maxDuration?: number;
 }
 
 export const WorkoutList = ({
   page,
   pageSize,
   onPageChange,
+  typeFilter,
+  dateFrom,
+  dateTo,
+  minDuration,
+  maxDuration,
 }: WorkoutListProps) => {
   const { data, isLoading, isError, refetch } = useGetWorkoutsQuery({
     page,
     size: pageSize,
+    type: typeFilter,
+    date_from: dateFrom,
+    date_to: dateTo,
+    min_duration: minDuration,
+    max_duration: maxDuration,
   });
 
   if (isLoading) {
