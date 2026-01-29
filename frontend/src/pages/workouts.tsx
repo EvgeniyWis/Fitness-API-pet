@@ -1,10 +1,31 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "@/entities/user/model";
 import { WorkoutList } from "@/widgets/workout/workout-list/ui";
 
 export default function WorkoutsPage() {
+  const router = useRouter();
   const isAuthenticated = useSelector(selectIsAuthenticated);
+
+  const pageParam = router.query.page;
+  const pageFromQuery = Array.isArray(pageParam) ? pageParam[0] : pageParam;
+  const currentPage =
+    pageFromQuery
+      ? Math.max(1, Number.parseInt(pageFromQuery, 10))
+      : 1;
+
+  const handlePageChange = (nextPage: number) => {
+    const query = { page: String(nextPage) };
+    router.push(
+      {
+        pathname: "/workouts",
+        query,
+      },
+    );
+  };
+
+  const PAGE_SIZE = 10;
 
   return (
     <div className="space-y-6">
@@ -27,8 +48,11 @@ export default function WorkoutsPage() {
         ) : null}
       </div>
 
-      <WorkoutList />
+      <WorkoutList
+        page={currentPage}
+        pageSize={PAGE_SIZE}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }
-
