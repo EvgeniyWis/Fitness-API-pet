@@ -31,7 +31,7 @@ def init_redis() -> Redis | None:
     global redis_client
 
     if not settings.REDIS_ENABLED:
-        print("○ Redis отключён (REDIS_ENABLED=false), токены хранятся в БД")
+        print("[INFO] Redis disabled (REDIS_ENABLED=false), tokens stored in DB")
         return None
 
     # Собираем URL из отдельных параметров

@@ -2,7 +2,7 @@
 
 import { baseApi } from "@/shared/api";
 import type { Workout } from "@/entities/workout/model";
-import type { GetWorkoutsParams } from "./types";
+import type { CreateWorkoutRequest, GetWorkoutsParams } from "./types";
 
 export const workoutsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -13,7 +13,15 @@ export const workoutsApi = baseApi.injectEndpoints({
         params: params,
       }),
     }),
+    createWorkout: build.mutation<Workout, CreateWorkoutRequest>({
+      query: (body) => ({
+        url: "/workouts",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [{ type: "Workout", id: "LIST" }],
+    }),
   }),
 });
 
-export const { useGetWorkoutsQuery } = workoutsApi;
+export const { useGetWorkoutsQuery, useCreateWorkoutMutation } = workoutsApi;

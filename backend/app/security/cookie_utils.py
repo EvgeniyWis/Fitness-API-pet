@@ -1,5 +1,7 @@
 from fastapi import Request, Response
 
+from app.core.config import settings
+
 
 def set_cookie(response: Response, value: str, key: str, max_age: int) -> None:
     """
@@ -13,7 +15,7 @@ def set_cookie(response: Response, value: str, key: str, max_age: int) -> None:
         key=key,
         value=value,
         httponly=True,  # Защита от XSS атак
-        secure=True,  # Только HTTPS (в production)
+        secure=settings.COOKIE_SECURE,  # False на localhost (HTTP)
         samesite="lax",  # Защита от CSRF атак
         max_age=max_age,  # Время жизни в секундах
     )

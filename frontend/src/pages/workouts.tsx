@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "@/entities/user/model";
 import { WorkoutList } from "@/widgets/workout/workout-list/ui";
+import { Button } from "@/shared/ui";
 
 export default function WorkoutsPage() {
   const router = useRouter();
@@ -27,9 +28,12 @@ export default function WorkoutsPage() {
   const minDurationRaw = getQueryParam("min_duration")!;
   const maxDurationRaw = getQueryParam("max_duration")!;
 
-  const minDuration = Number.parseInt(minDurationRaw, 10);
-
-  const maxDuration = Number.parseInt(maxDurationRaw, 10);
+  const parseOptionalInt = (s: string): number => {
+    const n = Number.parseInt(s, 10);
+    return n;
+  };
+  const minDuration = parseOptionalInt(minDurationRaw);
+  const maxDuration = parseOptionalInt(maxDurationRaw);
 
   const buildQuery = (overrides: {
     page?: string;
@@ -54,8 +58,10 @@ export default function WorkoutsPage() {
     if (type) query.type = type;
     if (date_from) query.date_from = date_from;
     if (date_to) query.date_to = date_to;
-    if (min_duration) query.min_duration = min_duration;
-    if (max_duration) query.max_duration = max_duration;
+    const minNum = Number(min_duration);
+    const maxNum = Number(max_duration);
+    if (Number.isFinite(minNum)) query.min_duration = String(minNum);
+    if (Number.isFinite(maxNum)) query.max_duration = String(maxNum);
 
     return query;
   };
@@ -102,20 +108,16 @@ export default function WorkoutsPage() {
   };
 
   const handleMinDurationChange = (value: string) => {
-    const trimmed = value.trim();
-
     pushWithQuery({
       page: "1",
-      min_duration: trimmed || undefined,
+      min_duration: value.trim(),
     });
   };
 
   const handleMaxDurationChange = (value: string) => {
-    const trimmed = value.trim();
-
     pushWithQuery({
       page: "1",
-      max_duration: trimmed || undefined,
+      max_duration: value.trim(),
     });
   };
 
@@ -138,15 +140,23 @@ export default function WorkoutsPage() {
           </p>
         </div>
 
-        {!isAuthenticated ? (
-          <div className="text-sm text-gray-700">
-            Чтобы увидеть тренировки, нужно{" "}
-            <Link href="/login" className="font-medium underline">
-              войти
+        <div className="flex items-center gap-3">
+          {isAuthenticated ? (
+            <Link href="/workouts/new">
+              <Button variant="primary" size="md">
+                Создать тренировку
+              </Button>
             </Link>
-            .
-          </div>
-        ) : null}
+          ) : (
+            <div className="text-sm text-gray-700">
+              Чтобы увидеть тренировки, нужно{" "}
+              <Link href="/login" className="font-medium underline">
+                войти
+              </Link>
+              .
+            </div>
+          )}
+        </div>
       </div>
 
       {isAuthenticated ? (

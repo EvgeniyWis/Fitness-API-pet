@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str  # DEBUG, INFO, WARNING, ERROR, CRITICAL
 
+    # Cookie: secure=True только для HTTPS (на localhost ставить false)
+    COOKIE_SECURE: bool = False
+
     model_config = SettingsConfigDict(env_file=".env")
 
 

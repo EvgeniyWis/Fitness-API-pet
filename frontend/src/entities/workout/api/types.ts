@@ -7,3 +7,12 @@ export interface GetWorkoutsParams {
   page?: number;
   size?: number;
 }
+
+export interface CreateWorkoutRequest {
+  type: "gym" | "volleyball";
+  duration: number;
+  repetitions: number;
+  planned_date?: string | null; // YYYY-MM-DD
+  notes?: string | null;
+  exercises?: string[] | null;
+}

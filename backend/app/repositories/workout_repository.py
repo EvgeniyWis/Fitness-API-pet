@@ -70,8 +70,8 @@ class WorkoutRepository:
         # Исключаем id при создании, чтобы БД сама сгенерировала новый ID
         workout_dict = workout_data.model_dump(exclude={"id"})
 
-        # Преобразуем строку даты в объект date
-        if "planned_date" in workout_dict and workout_dict["planned_date"] is not None:
+        # Преобразуем строку даты в объект date (пустая строка → None)
+        if "planned_date" in workout_dict:
             workout_dict["planned_date"] = convert_date_string(workout_dict["planned_date"])
 
         workout = Workout(**workout_dict)
@@ -131,8 +131,8 @@ class WorkoutRepository:
             # Исключаем id при обновлении, чтобы не менять ID записи
             workout_dict = workout_data.model_dump(exclude={"id"})
 
-            # Преобразуем строку даты в объект date
-            if "planned_date" in workout_dict and workout_dict["planned_date"] is not None:
+            # Преобразуем строку даты в объект date (пустая строка → None)
+            if "planned_date" in workout_dict:
                 workout_dict["planned_date"] = convert_date_string(workout_dict["planned_date"])
 
             # Обновляем поля объекта
