@@ -1,4 +1,5 @@
 // Виджет списка тренировок
+import { useRouter } from "next/router";
 import { useGetWorkoutsQuery } from "@/entities/workout/api";
 import type { GymType } from "@/entities/workout/model";
 
@@ -23,6 +24,7 @@ export const WorkoutList = ({
   minDuration,
   maxDuration,
 }: WorkoutListProps) => {
+  const router = useRouter();
   const { data, isLoading, isError, refetch } = useGetWorkoutsQuery({
     page,
     size: pageSize,
@@ -69,7 +71,8 @@ export const WorkoutList = ({
         {data.map((w) => (
           <div
             key={w.id}
-            className="rounded-lg border border-gray-200 bg-white p-4"
+            className="rounded-lg border border-gray-200 bg-white p-4 cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all"
+            onClick={() => router.push(`/workouts/${w.id}/edit`)}
           >
             <div className="flex items-start justify-between gap-4">
               <div>

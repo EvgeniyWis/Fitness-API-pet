@@ -16,3 +16,12 @@ export interface CreateWorkoutRequest {
   notes?: string | null;
   exercises?: string[] | null;
 }
+
+export interface UpdateWorkoutRequest {
+  type: "gym" | "volleyball";
+  duration: number;
+  repetitions: number;
+  planned_date?: string | null; // YYYY-MM-DD
+  notes?: string | null;
+  exercises?: string[] | null;
+}

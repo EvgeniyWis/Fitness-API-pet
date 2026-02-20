@@ -25,12 +25,13 @@ export default function WorkoutsPage() {
   const dateFrom = getQueryParam("date_from");
   const dateTo = getQueryParam("date_to");
 
-  const minDurationRaw = getQueryParam("min_duration")!;
-  const maxDurationRaw = getQueryParam("max_duration")!;
+  const minDurationRaw = getQueryParam("min_duration");
+  const maxDurationRaw = getQueryParam("max_duration");
 
-  const parseOptionalInt = (s: string): number => {
+  const parseOptionalInt = (s: string | undefined): number | undefined => {
+    if (s === undefined || s.trim() === "") return undefined;
     const n = Number.parseInt(s, 10);
-    return n;
+    return Number.isFinite(n) ? n : undefined;
   };
   const minDuration = parseOptionalInt(minDurationRaw);
   const maxDuration = parseOptionalInt(maxDurationRaw);
@@ -48,8 +49,8 @@ export default function WorkoutsPage() {
       type = typeFilter,
       date_from = dateFrom,
       date_to = dateTo,
-      min_duration = minDurationRaw,
-      max_duration = maxDurationRaw,
+      min_duration = minDurationRaw ?? "",
+      max_duration = maxDurationRaw ?? "",
     } = overrides;
 
     const query: Record<string, string> = {};
@@ -58,8 +59,8 @@ export default function WorkoutsPage() {
     if (type) query.type = type;
     if (date_from) query.date_from = date_from;
     if (date_to) query.date_to = date_to;
-    const minNum = Number(min_duration);
-    const maxNum = Number(max_duration);
+    const minNum = min_duration === "" ? NaN : Number(min_duration);
+    const maxNum = max_duration === "" ? NaN : Number(max_duration);
     if (Number.isFinite(minNum)) query.min_duration = String(minNum);
     if (Number.isFinite(maxNum)) query.max_duration = String(maxNum);
 
@@ -250,8 +251,8 @@ export default function WorkoutsPage() {
         typeFilter={typeFilter}
         dateFrom={dateFrom}
         dateTo={dateTo}
-        minDuration={minDuration}
-        maxDuration={maxDuration}
+        minDuration={minDuration ?? undefined}
+        maxDuration={maxDuration ?? undefined}
       />
     </div>
   );
